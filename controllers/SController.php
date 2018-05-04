@@ -1,7 +1,14 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: amitty
- * Date: 5/4/2018
- * Time: 12:00 PM
- */
+
+namespace app\controllers;
+
+use Yii;
+use yii\web\Controller;
+
+class SController extends Controller
+{
+  public function actionIndex()
+  {
+    return $this->render('index');
+  }
+}
