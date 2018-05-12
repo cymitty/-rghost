@@ -21,7 +21,7 @@ require __DIR__ . '/../vendor/autoload.php';
 // Initialize getID3 engine
 $getID3 = new getID3;
 
-$filename = 'uploads/Kellary-7-1-1-800x605.png';
+$filename = '../files/logo2018-05-05_20-48-19.jpg';
 
 // Analyze file and store returned data in $ThisFileInfo
 $ThisFileInfo = $getID3->analyze($filename);

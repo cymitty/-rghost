@@ -12,22 +12,27 @@ class SController extends Controller
 {
   public function actionIndex()
   {
+    // action загрузки файла
     $model = new UploadForm();
 
-    if (Yii::$app->request->isPost) {
+    if ( Yii::$app->request->isPost ) {
+      $model->load(Yii::$app->request->post());
       $model->file = UploadedFile::getInstance($model, 'file');
       $transaction = Yii::$app->db->beginTransaction();
       if ($filePath = $model->upload()) {
         // file is uploaded successfully
         $newFile = new File();
         $newFile->name = $model->file->baseName . '.' . $model->file->extension;
-        $newFile->meta = $newFile->generateFileMeta($filePath);
+        $fileMeta = $newFile->generateFileMeta($filePath);
+        $newFile->meta = json_encode($fileMeta);;
+        $newFile->size = $fileMeta['filesize'];
+        $newFile->date = date("Y-m-d");
+        $newFile->comment = $model->comment;
         $newFile->save();
+
         $transaction->commit();
 
-        $fileInfo = json_decode($newFile->meta, true);
-        return Yii::$app->response->redirect(['s/file', 'name' => $newFile->name]);
-        //return $this->render('download/file', ['newFile' => $newFile, 'fileInfo' => $fileInfo]);
+        return Yii::$app->response->redirect(['s/file', 'id' => $newFile->id]);
       } else {
         // file not uploaded correctly
         $transaction->rollBack();
@@ -40,18 +45,19 @@ class SController extends Controller
   /*
    * Страница с информацией о файле и ссылкой на скачивание
    */
-  public function actionFile($name = false)
+  public function actionFile($id = false)
   {
 
-    $model = new File();
-    $file = $model::find()->where(['name' => $name])->one();
+    $file = new File();
+    $file = $file::find()->where(['id' => $id])->one();
     if (isset($file))
     {
-      // Такой файл существует
+      // Файл с $name имеется в дб
+
       $fileInfo = json_decode($file->meta, true);
-      return $this->render('file', ['file' => $file, 'fileInfo' => $fileInfo]);
+      return $this->render('file', ['file' => $file, 'fileInfo' => $fileInfo ]);
     } else {
-      // Если файла с таким id нет
+      // Если файла с таким $name нет
       return $this->render('file');
     }
 
@@ -59,18 +65,20 @@ class SController extends Controller
 
   public function actionDownload($name)
   {
-    $filePath = 'C:\docs\projects\rghost\files\\' . $name;
+//    $filePath = "C:\docs\projects\rghost\files" . "\\" . $name;
+
 //    Yii::$app->getResponse()
 //        ->getHeaders()
 //        ->set('X-SendFile: ' . $filePath);
-    header('Content-Description: File Transfer');
-    header("Content-Disposition: attachment; filename=\"". basename($filePath) . "\"");
-    header('Content-Transfer-Encoding: binary');
-    header('Expires: 0');
-    header('Cache-Control: no-store, no-cache, must-revalidate');
-    header('Pragma: no-cache');
-    header('Content-Length: ' . filesize($filePath));
-    header("X-Sendfile: $filePath");
+//    header('Content-Description: File Transfer');
+
+//    header('Content-Transfer-Encoding: binary');
+////    header('Expires: 0');
+////    header('Cache-Control: no-store, no-cache, must-revalidate');
+////    header('Pragma: no-cache');
+//    header('Content-Length: ' . filesize($filePath));
+    header("Content-Disposition: attachment; filename=" . $name);
+    header('X-Sendfile: ' . $name);
 //    die();
   }
 }

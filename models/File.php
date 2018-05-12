@@ -47,6 +47,7 @@ class File extends \yii\db\ActiveRecord
 
   /*
    * $file - Путь и название файла с расширением
+   * return Array
    *
    */
   public function generateFileMeta($file)
@@ -62,8 +63,9 @@ class File extends \yii\db\ActiveRecord
         'fileformat'    => $ThisFileInfo['fileformat'],
         'mime_type'     => $ThisFileInfo['mime_type']
     ];
-    $fileMeta = json_encode($fileMeta);
+
     return $fileMeta;
   }
+
 
 }
