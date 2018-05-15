@@ -3,17 +3,32 @@
 namespace app\controllers;
 
 use Yii;
+use yii\data\Pagination;
 use yii\web\Controller;
 use app\models\UploadForm;
 use yii\web\UploadedFile;
 use app\models\File;
+use yii\data\ActiveDataProvider;
 
 class SController extends Controller
 {
   public function actionIndex()
   {
-    // action загрузки файла
-    $model = new UploadForm();
+    $model = new UploadForm();// Форма загрузки файла
+
+    $query = File::find();
+    $filesProvider = new ActiveDataProvider([
+        'query' => $query,
+        'totalCount' => 20,
+        'pagination' => [
+            'pageSize' => 10,
+        ],
+        'sort' => [
+            'defaultOrder' => [
+                'id' => SORT_DESC,
+            ]
+        ],
+    ]);
 
     if ( Yii::$app->request->isPost ) {
       $model->load(Yii::$app->request->post());
@@ -29,17 +44,21 @@ class SController extends Controller
         $newFile->date = date("Y-m-d");
         $newFile->comment = $model->comment;
         $newFile->save();
-
         $transaction->commit();
-
         return Yii::$app->response->redirect(['s/file', 'id' => $newFile->id]);
       } else {
-        // file not uploaded correctly
+        // Файл не был загружен коректно
         $transaction->rollBack();
-        return $this->render('index', ['model' => $model]);
+        return $this->render('index', [
+            'model' => $model,
+            'filesProvider' => $filesProvider,
+        ]);
       }
     }
-    return $this->render('index', ['model' => $model]);
+    return $this->render('index', [
+        'model' => $model,
+        'filesProvider' => $filesProvider,
+    ]);
   }
 
   /*
