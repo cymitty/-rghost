@@ -18,7 +18,7 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
-                // ...
+                'file/<id:\d+>' => 's/file'
             ],
         ],
         'request' => [
